@@ -24,6 +24,9 @@
           dtd[tagName]['drupal-entity'] = 1;
         }
       }
+           // Display the drupal-entity element inline.
+       //   dtd.$inline['drupal-entity'] = 1;
+      dtd['p']['drupal-entity'] = 1;
 
       // Generic command for adding/editing entities of all types.
       editor.addCommand('editdrupalentity', {
@@ -65,13 +68,36 @@
               entityElement.setAttribute(key, attributes[key]);
             }
 
-            editor.insertHtml(entityElement.getOuterHtml());
+            entityElement.setHtml('['+embed_button_id+']');
+            //alert(entityElement.getOuterHtml());
+            //alert(entityElement.getInnerHTML());
+
+            editor.insertElement(entityElement);
             if (existingElement) {
               // Detach the behaviors that were attached when the entity content
               // was inserted.
               Drupal.runEmbedBehaviors('detach', existingElement.$);
               existingElement.remove();
             }
+
+            var handleAfterCommandExec = function(event)
+            {
+              var commandName = event.data.name;
+              // For 'bold' commmand
+              if (commandName == 'source'){
+                //alert("Bold button pressed!");
+                //editor.execCommand( 'source' );
+                editor.setMode( 'wysiwyg' );
+              }
+
+            }
+
+            //editor.on('afterCommandExec', handleAfterCommandExec);
+
+            editor.execCommand( 'source' );
+            editor.setMode( 'wysiwyg' );
+
+
           };
 
           // Open the entity embed dialog for corresponding EmbedButton.
@@ -81,6 +107,7 @@
 
       // Register the entity embed widget.
       editor.widgets.add('drupalentity', {
+        inline: true,
         // Minimum HTML which is required by this widget to work.
         allowedContent: 'drupal-entity[data-entity-type,data-entity-uuid,data-entity-embed-display,data-entity-embed-display-settings,data-align,data-caption]',
         requiredContent: 'drupal-entity[data-entity-type,data-entity-uuid,data-entity-embed-display,data-entity-embed-display-settings,data-align,data-caption]',
@@ -105,7 +132,7 @@
           var element = this.element;
           // Use the Ajax framework to fetch the HTML, so that we can retrieve
           // out-of-band assets (JS, CSS...).
-          var entityEmbedPreview = Drupal.ajax({
+     /*     var entityEmbedPreview = Drupal.ajax({
             base: element.getId(),
             element: element.$,
             url: Drupal.url('embed/preview/' + editor.config.drupal.format + '?' + $.param({
@@ -115,15 +142,15 @@
             // Use a custom event to trigger the call.
             event: 'entity_embed_dummy_event'
           });
-          entityEmbedPreview.execute();
+          entityEmbedPreview.execute();*/
         },
 
         // Downcast the element.
         downcast: function (element) {
           // Only keep the wrapping element.
-          element.setHtml('');
+          // element.setHtml('');
           // Remove the auto-generated ID.
-          delete element.attributes.id;
+          // delete element.attributes.id;
           return element;
         }
       });
